@@ -28,7 +28,7 @@ export default function LoginForm() {
         throw new Error("Invalid credentials");
       }
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 

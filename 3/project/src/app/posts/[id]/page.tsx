@@ -7,6 +7,8 @@ interface Post {
   body: string;
 }
 
+type Params = Promise<{ id: string }>;
+
 async function getPost(id: string): Promise<Post> {
   const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
     cache: "no-store",
@@ -19,11 +21,8 @@ async function getPost(id: string): Promise<Post> {
   return res.json();
 }
 
-export async function generateMetadata({
-  params: { id },
-}: {
-  params: { id: string };
-}) {
+export async function generateMetadata({ params }: { params: Params }) {
+  const { id } = await params;
   const post = await getPost(id);
 
   return {
@@ -38,11 +37,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function PostDetailsPage({
-  params: { id },
-}: {
-  params: { id: string };
-}) {
+export default async function PostDetailsPage({ params }: { params: Params }) {
+  const { id } = await params;
   const post = await getPost(id);
 
   return (
