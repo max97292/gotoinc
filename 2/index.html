@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Page</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const colorOptions = document.querySelectorAll(".colors img");
+      const galleryThumbnails = document.querySelectorAll(
+        ".thumbnails .thumbnail img"
+      );
+      const mainImageElement = document.querySelector(".main-image img");
+      const colorLabel = document.querySelector(".color-options p b");
+      const tabButtons = document.querySelectorAll(".tab-button");
+      const tabPanels = document.querySelectorAll(".tab-panel");
+      const guideBtn = document.querySelector(".guide-btn");
+      const guide = document.querySelector(".guide");
+      const closeGuide = guide.querySelector("svg");
+      const thumbnails = document.querySelectorAll(".thumbnail");
+      const sizeConversionButtons = document.querySelectorAll(
+        ".size-conversion button"
+      );
+      const sizeGroupButtons = document.querySelectorAll(".size-group button");
+      const sizeDisplay = document.querySelector(".size-selector .title");
+
+      let selectedSize = "6.5";
+      let selectedConversion = "UK";
+
+      const sizeMapping = {
+        UK: [
+          "6",
+          "6.5",
+          "7",
+          "7.5",
+          "8",
+          "8.5",
+          "9",
+          "9.5",
+          "10",
+          "10.5",
+          "11",
+          "11.5",
+          "12",
+          "12.5",
+          "13",
+        ],
+        US: [
+          "7",
+          "7.5",
+          "8",
+          "8.5",
+          "9",
+          "9.5",
+          "10",
+          "10.5",
+          "11",
+          "11.5",
+          "12",
+          "12.5",
+          "13",
+          "13.5",
+          "14",
+        ],
+        EU: [
+          "39.5",
+          "40",
+          "41",
+          "41.5",
+          "42",
+          "42.5",
+          "43",
+          "43.5",
+          "44",
+          "44.5",
+          "45",
+          "45.5",
+          "46",
+          "46.5",
+          "47",
+        ],
+        "Foot Length (cm)": [
+          "24.5",
+          "25",
+          "25.4",
+          "25.8",
+          "26.2",
+          "26.7",
+          "27.1",
+          "27.5",
+          "27.9",
+          "28.4",
+          "28.8",
+          "29.2",
+          "29.6",
+          "30.1",
+          "30.5",
+        ],
+      };
+
+      const updateGalleryImages = (newColor) => {
+        const colorKey = newColor.split(" ").pop().toLowerCase();
+        galleryThumbnails.forEach((thumbnail, i) => {
+          thumbnail.src = `images/image-${i + 1}-${colorKey}.png`;
+          thumbnail.alt = `${newColor} View ${i + 1}`;
+        });
+        mainImageElement.src = galleryThumbnails[0].src;
+        mainImageElement.alt = galleryThumbnails[0].alt;
+        document.querySelector(".thumbnail.active").classList.remove("active");
+        galleryThumbnails[0].parentNode.classList.add("active");
+      };
+
+      const updateTabDisplay = (activeTab) => {
+        tabButtons.forEach((btn) => btn.classList.remove("active"));
+        tabPanels.forEach((panel) => panel.classList.remove("active"));
+        activeTab.classList.add("active");
+        document.getElementById(activeTab.dataset.tab).classList.add("active");
+      };
+
+      const toggleGuideVisibility = (show) => {
+        guide.style.display = show ? "flex" : "none";
+        guide.style.opacity = show ? "1" : "0";
+      };
+
+      const updateSizeGroupButtons = (conversionType, previousType = null) => {
+        const sizes = sizeMapping[conversionType];
+        let newSelectedSize =
+          sizes.find((size, i) =>
+            previousType ? sizeMapping[previousType][i] === selectedSize : false
+          ) || selectedSize;
+        sizeGroupButtons.forEach((button, index) => {
+          if (sizes[index]) {
+            button.textContent = sizes[index];
+            button.style.display = "inline-block";
+            button.disabled = false;
+          } else {
+            button.style.display = "none";
+          }
+        });
+        selectedSize = newSelectedSize;
+        sizeDisplay.innerHTML = `<b>Size:</b> ${selectedSize} ${selectedConversion}`;
+      };
+
+      colorOptions.forEach((color) => {
+        color.addEventListener("click", () => {
+          if (color.classList.contains("sold")) return;
+
+          document
+            .querySelector(".colors img.selected")
+            ?.classList.remove("selected");
+          color.classList.add("selected");
+          const newColor = color.alt;
+          colorLabel.nextSibling.textContent = ` ${newColor}`;
+          updateGalleryImages(newColor);
+        });
+      });
+
+      tabButtons.forEach((button) =>
+        button.addEventListener("click", () => updateTabDisplay(button))
+      );
+
+      guideBtn.addEventListener("click", () => toggleGuideVisibility(true));
+      closeGuide.addEventListener("click", () => toggleGuideVisibility(false));
+
+      thumbnails.forEach((thumbnail) => {
+        thumbnail.addEventListener("click", () => {
+          document
+            .querySelector(".thumbnail.active")
+            ?.classList.remove("active");
+          thumbnail.classList.add("active");
+          mainImageElement.src = thumbnail.querySelector("img").src;
+          mainImageElement.alt = thumbnail.querySelector("img").alt;
+        });
+      });
+
+      sizeConversionButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelector(".size-conversion button.selected")
+            ?.classList.remove("selected");
+          button.classList.add("selected");
+          const previousConversion = selectedConversion;
+          selectedConversion = button.textContent;
+          updateSizeGroupButtons(selectedConversion, previousConversion);
+        });
+      });
+
+      sizeGroupButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          if (!button.disabled) {
+            selectedSize = button.textContent;
+            document
+              .querySelector(".size-group button.selected")
+              ?.classList.remove("selected");
+            button.classList.add("selected");
+            sizeDisplay.innerHTML = `<b>Size:</b> ${selectedSize} ${selectedConversion}`;
+          }
+        });
+      });
+
+      updateSizeGroupButtons("UK");
+    });
+  </script>
+
+  <body>
+    <header>
+      <nav class="breadcrumbs">
+        <a href="#">Home</a> / <a href="#">Unisex Shoes</a> /
+        <a href="#">Unisex SportStyle Shoes</a>
+      </nav>
+    </header>
+
+    <main class="product">
+      <section class="parameters-section">
+        <div class="gallery">
+          <div class="main-image">
+            <img
+              src="images/image-1-yellow.png"
+              alt="ASICS GEL-KAYANO 14"
+              class=""
+            />
+            <button class="like-mobile">
+              <svg
+                width="22"
+                height="19"
+                viewBox="0 0 22 19"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15.4945 0.589844C13.5597 0.589844 11.9065 1.96892 10.9982 2.91969C10.0899 1.96892 8.44035 0.589844 6.5065 0.589844C3.17327 0.589844 0.846191 2.91323 0.846191 6.23907C0.846191 9.90369 3.73635 12.2723 6.53235 14.5634C7.85235 15.6462 9.2185 16.7649 10.2662 18.0055C10.4425 18.2132 10.701 18.3332 10.9723 18.3332H11.0259C11.2982 18.3332 11.5557 18.2123 11.7311 18.0055C12.7807 16.7649 14.1459 15.6452 15.4668 14.5634C18.2619 12.2732 21.1539 9.90461 21.1539 6.23907C21.1539 2.91323 18.8268 0.589844 15.4945 0.589844Z"
+                  fill="#21262C"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="thumbnails">
+            <div class="thumbnail active">
+              <img src="images/image-1-yellow.png" alt="View 1" />
+            </div>
+            <div class="thumbnail">
+              <img src="images/image-2-yellow.png" alt="View 2" />
+            </div>
+            <div class="thumbnail">
+              <img src="images/image-3-yellow.png" alt="View 3" />
+            </div>
+            <div class="thumbnail">
+              <img src="images/image-4-yellow.png" alt="View 4" />
+            </div>
+            <div class="thumbnail">
+              <img src="images/image-5-yellow.png" alt="View 5" />
+            </div>
+            <div class="thumbnail">
+              <img src="images/image-6-yellow.png" alt="View 6" />
+            </div>
+          </div>
+        </div>
+
+        <div class="product-info">
+          <div class="headline">
+            <h1>ASICS GEL-KAYANO 14</h1>
+            <h2>$155.00</h2>
+          </div>
+
+          <div class="options">
+            <div class="color-options">
+              <p>
+                <b>Colour:</b>
+                White/Tai Chi Yellow
+              </p>
+              <div class="colors">
+                <img
+                  class="sold"
+                  src="images/image-1-cream.png"
+                  alt="White/Cream"
+                  data-tooltip="Sold out"
+                />
+                <img
+                  src="images/image-1-green.png"
+                  alt="Metropolis/Jasper Green"
+                />
+                <img
+                  class="sold"
+                  src="images/image-1-blue.png"
+                  alt="Cream/Denim Blue"
+                  data-tooltip="Sold out"
+                />
+                <img
+                  class="sold"
+                  src="images/image-1-pink.png"
+                  alt="Cream/Sweet Pink"
+                  data-tooltip="Sold out"
+                />
+                <img
+                  class="selected"
+                  src="images/image-1-yellow.png"
+                  alt="White/Tai Chi Yellow"
+                />
+              </div>
+            </div>
+
+            <div class="size-selector">
+              <div class="title">
+                <b>Size:</b>
+                6.5 UK
+              </div>
+              <div class="size-conversion">
+                <button class="selected">UK</button>
+                <button>US</button>
+                <button>EU</button>
+                <button>Foot Length (cm)</button>
+              </div>
+              <div class="size-group">
+                <button>6</button>
+                <button class="selected">6.5</button>
+                <button>7</button>
+                <button>7.5</button>
+                <button>8</button>
+                <button>8.5</button>
+                <button>9</button>
+                <button>9.5</button>
+                <button>10</button>
+                <button>10.5</button>
+                <button>11</button>
+                <button>11.5</button>
+                <button disabled>12</button>
+                <button disabled>12.5</button>
+                <button>13</button>
+              </div>
+              <button class="guide-btn">Size guide</button>
+            </div>
+          </div>
+          <div class="buttons">
+            <button class="cart">
+              <svg
+                width="17"
+                height="18"
+                viewBox="0 0 17 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8.49992 4C8.78325 4 9.02092 3.904 9.21292 3.712C9.40492 3.52 9.50059 3.28267 9.49992 3C9.49925 2.71733 9.40325 2.48 9.21192 2.288C9.02059 2.096 8.78325 2 8.49992 2C8.21659 2 7.97925 2.096 7.78792 2.288C7.59659 2.48 7.50059 2.71733 7.49992 3C7.49925 3.28267 7.59525 3.52033 7.78792 3.713C7.98059 3.90567 8.21792 4.00133 8.49992 4ZM11.3249 4H13.0749C13.5749 4 14.0083 4.16667 14.3749 4.5C14.7416 4.83333 14.9666 5.24167 15.0499 5.725L16.4749 15.725C16.5583 16.325 16.4043 16.8543 16.0129 17.313C15.6216 17.7717 15.1173 18.0007 14.4999 18H2.49992C1.88325 18 1.37892 17.771 0.986921 17.313C0.594921 16.855 0.440921 16.3257 0.524921 15.725L1.94992 5.725C2.03325 5.24167 2.25825 4.83333 2.62492 4.5C2.99159 4.16667 3.42492 4 3.92492 4H5.67492C5.62492 3.83333 5.58325 3.671 5.54992 3.513C5.51659 3.355 5.49992 3.184 5.49992 3C5.49992 2.16667 5.79159 1.45833 6.37492 0.875C6.95825 0.291667 7.66659 0 8.49992 0C9.33325 0 10.0416 0.291667 10.6249 0.875C11.2083 1.45833 11.4999 2.16667 11.4999 3C11.4999 3.18333 11.4833 3.35433 11.4499 3.513C11.4166 3.67167 11.3749 3.834 11.3249 4Z"
+                  fill="#21262C"
+                />
+              </svg>
+              Add to cart
+            </button>
+            <button class="like">
+              <svg
+                width="22"
+                height="19"
+                viewBox="0 0 22 19"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15.4945 0.589844C13.5597 0.589844 11.9065 1.96892 10.9982 2.91969C10.0899 1.96892 8.44035 0.589844 6.5065 0.589844C3.17327 0.589844 0.846191 2.91323 0.846191 6.23907C0.846191 9.90369 3.73635 12.2723 6.53235 14.5634C7.85235 15.6462 9.2185 16.7649 10.2662 18.0055C10.4425 18.2132 10.701 18.3332 10.9723 18.3332H11.0259C11.2982 18.3332 11.5557 18.2123 11.7311 18.0055C12.7807 16.7649 14.1459 15.6452 15.4668 14.5634C18.2619 12.2732 21.1539 9.90461 21.1539 6.23907C21.1539 2.91323 18.8268 0.589844 15.4945 0.589844Z"
+                  fill="#21262C"
+                />
+              </svg>
+            </button>
+            <button class="compare">
+              <svg
+                width="22"
+                height="19"
+                viewBox="0 0 22 19"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11.9981 0V1H18.9981V3H11.9981V17H15.9981V19H5.99806V17H9.99806V3H2.99806V1H9.99806V0H11.9981ZM3.99806 4.343L6.82606 7.172C7.38545 7.73142 7.76639 8.44415 7.92072 9.22007C8.07504 9.99599 7.99582 10.8002 7.69306 11.5311C7.3903 12.262 6.87761 12.8867 6.21982 13.3262C5.56203 13.7658 4.78868 14.0004 3.99756 14.0004C3.20644 14.0004 2.43309 13.7658 1.7753 13.3262C1.11751 12.8867 0.604819 12.262 0.302062 11.5311C-0.000694603 10.8002 -0.07992 9.99599 0.0744042 9.22007C0.228728 8.44415 0.609671 7.73142 1.16906 7.172L3.99806 4.343ZM17.9981 4.343L20.8261 7.172C21.3855 7.73142 21.7664 8.44415 21.9207 9.22007C22.075 9.99599 21.9958 10.8002 21.6931 11.5311C21.3903 12.262 20.8776 12.8867 20.2198 13.3262C19.562 13.7658 18.7887 14.0004 17.9976 14.0004C17.2064 14.0004 16.4331 13.7658 15.7753 13.3262C15.1175 12.8867 14.6048 12.262 14.3021 11.5311C13.9993 10.8002 13.9201 9.99599 14.0744 9.22007C14.2287 8.44415 14.6097 7.73142 15.1691 7.172L17.9981 4.343ZM17.9981 7.172L16.5841 8.586C16.209 8.96099 15.9982 9.46961 15.9981 10L19.9981 10.001C19.9981 9.461 19.7861 8.96 19.4121 8.586L17.9981 7.172ZM3.99806 7.172L2.58406 8.586C2.20896 8.96099 1.99817 9.46961 1.99806 10L5.99806 10.001C5.99806 9.461 5.78606 8.96 5.41206 8.586L3.99806 7.172Z"
+                  fill="#21262C"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="tabs">
+        <div class="tab-buttons">
+          <button class="tab-button active" data-tab="description">
+            Description
+          </button>
+          <button class="tab-button" data-tab="details">Details</button>
+          <button class="tab-button" data-tab="shipping">Shipping</button>
+        </div>
+        <div class="tab-content">
+          <div id="description" class="tab-panel active">
+            <p>
+              The GEL-KAYANO 14 sneaker resurfaces with its late 2000s aesthetic
+              as a nod to our storied GEL-KAYANO series. Reinterpreting the
+              shoe's performance capabilities with updated materials and
+              componentry, this version became the first iteration in the
+              sneaker's lineage to be designed by someone other than Toshikazu
+              Kayano. Inspired by the original tooling from 2008, this shoe also
+              features GEL technology underfoot for advanced impact absorption.
+              <br />
+              <br />Style #: 1203A537.102
+            </p>
+          </div>
+          <div id="details" class="tab-panel">
+            <b>Original inspired tooling</b>
+            <p>2000s design language</p>
+            <br />
+            <b>GEL technology cushioning provides excellent shock absorption</b>
+            <p>TRUSSTIC support system</p>
+            <br />
+            <b
+              >The sockliner is produced with the solution dyeing process that
+              reduces water usage by approximately 33% and carbon emissions by
+              approximately 45% compared to the conventional dyeing
+              technology</b
+            >
+          </div>
+          <div id="shipping" class="tab-panel">
+            <p>
+              The ASICS GEL-KAYANO 14 is available at various online and
+              physical retailers. Prices typically range from $140 to $160
+              depending on size, colorway, and availability. Popular platforms
+              like ASICS Official Store, Amazon, Foot Locker, and Zappos offer
+              these sneakers with options for free shipping or discounts on
+              certain models. Be sure to check for seasonal sales or
+              limited-time offers when shopping, as prices can vary. Zappos and
+              Amazon often feature customer reviews and size guides to assist
+              with the purchasing process.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="guide">
+        <div class="header">
+          <h1>Size Guide</h1>
+          <svg
+            width="13"
+            height="12"
+            viewBox="0 0 13 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1.03833 11.243L6.28133 6.00002L1.03833 11.243ZM11.5243 0.757019L6.28033 6.00002L11.5243
+            0.757019ZM6.28033 6.00002L1.03833 0.757019L6.28033 6.00002ZM6.28133 6.00002L11.5243 11.243L6.28133 6.00002Z"
+              fill="#21262C"
+            />
+            <path
+              d="M1.03833 11.243L6.28133 6.00002L11.5243 11.243M11.5243 0.757019L6.28033 6.00002L1.03833 0.757019"
+              stroke="#303841"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="content">
+          <h2>How to measure shoe size?</h2>
+          <div>
+            <div>
+              <p>
+                Follow the simple steps below to determine your shoe size. Make
+                sure you do this during or at the end of the day to ensure the
+                right size (feet typically swell during the day).<br />
+              </p>
+              <ol>
+                <li>
+                  Put a piece of blank paper under your feet. Stand up straight
+                  and have your heel lightly touching against the wall.
+                </li>
+                <li>
+                  Have someone mark the end of the longest toe and the back of
+                  your heel on the sheet with a pen or pencil. Afterwards,
+                  measure the length of your feet from heel to toe.
+                </li>
+                <li>
+                  Repeat the steps for your other foot and compare it with our
+                  size chart below.
+                </li>
+              </ol>
+            </div>
+            <img src="images/guide.png" alt="Guide" />
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
